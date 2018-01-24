@@ -1,0 +1,23 @@
+{% load avatar_tags i18n %}
+
+<script type="text/template" id="side-nav-tmpl">
+    <ul class="side-tabnav-tabs">
+        <% if (can_add_repo) { %>
+        <li class="tab<% if (cur_tab == 'share-admin-repos') { %> tab-cur<% } %>">
+            <a href="{{ SITE_ROOT }}#share-admin-libs/"><span aria-hidden="true" class="sf2-icon-library"></span>{% trans "Libraries" %}</a>
+        </li>
+        <li class="tab<% if (cur_tab == 'share-admin-folders') { %> tab-cur<% } %>">
+            <a href="{{ SITE_ROOT }}#share-admin-folders/"><span aria-hidden="true" class="sf2-icon-folder"></span>{% trans "Folders" %}</a>
+        </li>
+        <% } %>
+        <% if (can_generate_share_link) { %>
+        <li class="tab<% if (cur_tab == 'share-admin-links') { %> tab-cur<% } %>">
+            <a href="{{ SITE_ROOT }}#share-admin-share-links/"><span aria-hidden="true" class="sf2-icon-link"></span>{% trans "Links" %}</a>
+        </li>
+        <% } else if (can_generate_upload_link) { %>
+        <li class="tab<% if (cur_tab == 'share-admin-links') { %> tab-cur<% } %>">
+            <a href="{{ SITE_ROOT }}#share-admin-upload-links/"><span aria-hidden="true" class="sf2-icon-link"></span>{% trans "Links" %}</a>
+        </li>
+        <% } %>
+    </ul>
+</script>

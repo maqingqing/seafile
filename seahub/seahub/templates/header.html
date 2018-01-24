@@ -1,0 +1,72 @@
+{% load seahub_tags avatar_tags group_avatar_tags i18n staticfiles %}
+{% load url from future %}
+
+
+<div id="header" class="navbar {% block header_css_class %}{% endblock %} row">
+    <div class="container">
+        <div id="header-inner" class="col-md-12">
+            {% block notice_panel %}{% endblock %}
+            <a href="{{ SITE_ROOT }}" id="logo" class="fleft">
+                <img src="{{ MEDIA_URL }}{{ logo_path }}" title="{{ site_title }}" alt="logo" width="{{ logo_width }}" height="{{ logo_height }}" />
+                <span class="logoText">{{ site_title }}</span>
+            </a>
+            <button class="sf2-icon-list-view side-nav-toggle hidden-md-up hide" title="{% trans "Side Nav Menu" %}" id="js-toggle-side-nav" aria-label="{% trans "Side Nav Menu" %}"></button>
+    {#				<button class="sf2-icon-list-view side-nav-toggle ppe" title="{% trans "Side Nav Menu" %}" id="js-toggle-side-nav" aria-label="{% trans "Side Nav Menu" %}"></button>#}
+            {% block header_right %}
+            {% if request.user.is_authenticated %}
+            <div class="fright">
+            {% if has_file_search %}
+                {% include 'snippets/search_form.html' %}
+            {% endif %}
+
+
+            <div id="account" class="fright">
+                <a id="my-info" href="#" class="no-deco" aria-label="{% trans "View profile and more" %}">
+                    {% avatar request.user 36 %} <span class="icon-caret-down vam"></span>
+                </a>
+                <div id="user-info-popup" class="account-popup sf-popover hide">
+                    <div class="outer-caret up-outer-caret"><div class="inner-caret"></div></div>
+                    <div class="sf-popover-con">
+                        <div class="item ovhd">
+                            {% avatar request.user 36 %}
+                            <div class="txt">
+                                {{ request.user.username|email2nickname }} <br />
+                                {{ request.user.username|email2contact_email}}
+                            </div>
+                        </div>
+                        <span class="loading-icon loading-tip"></span>
+                        <div id="space-traffic" class="hide" data-url="{% url 'space_and_traffic' %}"></div>
+                        <a class="item" href="{{ SITE_ROOT }}profile/">{% trans "Settings" %}</a>
+                        {% block admin_link %}
+                        {% if request.user.is_staff %}
+                        <a href="{% url 'sys_useradmin' %}" title="{% trans "System Admin" %}" class="item">{% trans "System Admin" %}</a>
+                        {% endif %}
+                        {% if request.user.org and request.user.org.is_staff %}
+                        <a href="{% url 'org_user_admin'%}" title="{% trans "Admin" %}" class="item">{% trans "Organization Admin" %}</a>
+                        {% endif %}
+                        {% if request.user.inst_admin %}
+                        <a href="{% url "institutions:useradmin" %}" title="{% trans "Admin" %}" class="item">{% trans "Admin" %}</a>
+                        {% endif %}
+                        {% endblock %}
+
+                        <a href="{{ SITE_ROOT }}accounts/logout/" class="item" id="logout">{% trans "Log out" %}</a>
+                    </div>
+                </div>
+            </div>
+            </div>
+            {% else %} {# for non-logged-in user #}
+            <div class="fright" id="lang">
+                <a href="#" id="lang-context" data-lang="{{ LANGUAGE_CODE }}">{{ LANGUAGE_CODE|language_name_local }} <span class="icon-caret-down"></span></a>
+                <div id="lang-context-selector" class="sf-popover hide">
+                    <ul class="sf-popover-con">
+                        {% for LANG in LANGUAGES %}
+                        <li><a href="{% url 'i18n' %}?lang={{ LANG.0 }}">{{ LANG.1 }}</a></li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+            {% endif %}
+            {% endblock %}
+        </div>
+    </div>
+</div>

@@ -1,0 +1,217 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block sub_title %}{% trans "Log In" %} - {% endblock %}
+
+{% block main_content %}
+    <div class="banner row">
+        <div class="container">
+            <div class="login_content col-md-10 col-xl-12">
+                <div class="new-narrow-panel">
+                    {#<h2 class="hd">{% trans "Log In" %}</h2>#}
+                    <h2 class="hd">欢迎使用Paladin云盘！</h2>
+                    <form action="" method="post" class="con">{% csrf_token %}
+                        <label for="login"></label>
+                            <input type="text" name="login" id="login" value="" placeholder="邮箱/用户名" class="input" />
+                        <label for="password"></label>
+
+                        <input type="password" name="password" id="password" value="" class="input" placeholder="密码" autocomplete="off" />
+                        {% if form.captcha %}
+                        {{ form.captcha }}
+                    {#    <p class="clear"><a href="#" id="refresh-captcha">{% trans "Not clear? Refresh it." %}</a></p>#}
+                    {#        <p class="clear"><a href="#" id="refresh-captcha">点击刷新</a></p>#}
+                        {% endif %}
+                        <input type="hidden" name="next" value="{% if next %}{{ next|escape }}{% else %}{{ SITE_ROOT }}{% endif %}" />
+                        {% if form.errors %}
+                          {% if form.captcha.errors %}
+                    {#        <p class="error">{{ form.captcha.errors}}1</p>#}
+                              <p class="error">验证码输入错误</p>
+                          {% elif form.errors.freeze_account %}
+                            <p class="error">{{ form.errors.freeze_account }}2</p>
+                          {% elif form.errors.inactive %}
+                            <p class="error">{{ form.errors.inactive }}3</p>
+                          {% else %}
+                            <p class="error">{% trans "Incorrect email or password" %}4</p>
+                          {% endif %}
+                        {% else %}
+                        <p class="error hide"></p>
+                        {% endif %}
+
+                        <label class="checkbox-label">
+                            <input type="checkbox" name="remember_me" class="vam" checked="checked" />
+                            <span class="vam">{% blocktrans %}Remember me for {{remember_days}} days {% endblocktrans %}</span>
+
+                            <a href="{{ SITE_ROOT }}accounts/password/reset/" class="forgetPaw">{% trans "(forgot password)" %}</a>
+                        </label>
+
+                        <input type="submit" value="{% trans "Log In" %}" class="submit" id="loginSub"/>
+                        {% if enable_signup %}
+                        <a href="{{ signup_url }}" id="register">{% trans "Signup" %}</a>
+                        {% endif %}
+
+                        {% if enable_adfs_login %}
+                        <button id="adfs-login" class="submit fright">ADFS</button>
+                        {% endif %}
+
+                        {% if enable_shib_login %}
+                        <button id="shib-login" class="submit fright">{% trans "Shibboleth" %}</button>
+                        {% endif %}
+
+                        {% if enable_krb5_login %}
+                        <button id="krb5-login" class="submit fright">{% trans "Kerberos" %}</button>
+                        {% endif %}
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="download-area" class="download-list">
+        <div class="container">
+            <ul class="row">
+                <li class="col-md-2 col-sm-2 col-xs-4">
+                    <a href="">
+                        <i class="fa fa-windows"></i>
+                        <b>Windows</b>
+                    </a>
+                </li>
+                <li class="col-md-2 col-sm-2 col-xs-4">
+                    <a href="">
+                        <i  class="fa fa-linux"></i>
+                        <b>Linux</b>
+                    </a>
+                </li>
+                <li class="col-md-2 col-sm-2 col-xs-4">
+                    <a href="">
+                        <i class="fa fa-apple"></i>
+                        <b>Mac</b>
+                    </a>
+                </li>
+                <li class="col-md-2 col-sm-2 col-xs-4">
+                    <a href="" class="download_qr_code">
+                        <i class="fa fa-android"></i>
+                        <b>Android</b>
+                    </a>
+                    <div class="qr_code">
+                        <img src="{{ MEDIA_URL }}img/android-qr-code.png" alt="">
+                    </div>
+                </li>
+                <li class="col-md-2 col-sm-2 col-xs-4">
+                    <a href="https://itunes.apple.com/cn/app/meepo/id967203749?mt=8" class="download_qr_code">
+                        <i class="fa fa-mobile"></i>
+                        <b>iphone</b>
+                    </a>
+                    <div class="qr_code">
+                        <img src="{{ MEDIA_URL }}img/iphone-qr-code.png" alt="">
+                    </div>
+                </li>
+                <li class="col-md-2 col-sm-2 col-xs-4">
+                    <a href="https://itunes.apple.com/cn/app/meepo-hd/id1034765678?mt=8" class="download_qr_code">
+                        <i class="fa fa-tablet"></i>
+                        <b>ipad</b>
+
+                    </a>
+                    <div class="qr_code">
+                        <img src="{{ MEDIA_URL }}img/ipad-qr-code.png" alt="">
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <div id="footer">
+        <div class="container">
+            <div class="row">
+                <div class="footText">© 2016 清华大学高性能所网格计算实验室</div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block extra_script %}
+<script type="text/javascript">
+
+{#设置验证码输入框的长度和占位符#}
+function setCaptchaInputWidth() {
+    $('#id_captcha_1').css({'width': $('.input').outerWidth() - $('.captcha').width() - 50});
+    $('#id_captcha_1').attr('placeholder',"请输入验证码");
+
+}
+
+$(window).load(setCaptchaInputWidth);
+$('.captcha').load(setCaptchaInputWidth);
+{#点击验证码图片时刷新验证码#}
+$('.captcha').attr('id', 'refresh-captcha');
+$('#refresh-captcha').click(function() {
+    $.ajax({
+        url: '{% url 'captcha-refresh' %}',
+        dataType:'json',
+        cache:false,
+        success: function(data) {
+            $('.captcha').attr('src', data['image_url']);
+
+            $('#id_captcha_0').val(data['key']);
+        },
+        error: function() {
+            $('.error').removeClass('hide').html("{% trans "Failed to refresh the CAPTCHA, please try again later." %}");
+        }
+    });
+    return false;
+});
+
+{#点击提交按钮时检查用户名或密码是否为空#}
+$('input[type="submit"]').click(function(){
+    if (!$.trim($('input[name="login"]').val())) {
+        $('.error').removeClass('hide').html("{% trans "Email or username cannot be blank" %}");
+        return false;
+    }
+    if (!$.trim($('input[name="password"]').val())) {
+        $('.error').removeClass('hide').html("{% trans "Password cannot be blank" %}");
+        return false;
+    }
+});
+
+{#下载列表hover时出现可供下载的二维码#}
+$('.download_qr_code').hover(function () {
+    $(this).siblings('div.qr_code').css("display",'block');
+  },
+  function () {
+    $(this).siblings('div.qr_code').css("display",'none');
+  },1000);
+
+// set tabindex
+$(function() {
+    $('input:not([type="hidden"])').each(function(index) {
+        $(this).attr('tabindex', index + 1);
+    });
+});
+
+{% if enable_shib_login %}
+$(function() {
+    $('#shib-login').click(function() {
+        window.location = "{% url 'shib_login' %}{% if next %}?next={{ next|escape }}{% endif %}";
+        return false;
+    });
+});
+{% endif %}
+
+{% if enable_krb5_login %}
+$(function() {
+    $('#krb5-login').click(function() {
+        window.location = "{% url 'krb5_login' %}{% if next %}?next={{ next|escape }}{% endif %}";
+        return false;
+    });
+});
+{% endif %}
+
+{% if enable_adfs_login %}
+$(function() {
+    $('#adfs-login').click(function() {
+        window.location = "{% url 'saml2_login' %}{% if next %}?next={{ next|escape }}{% endif %}";
+        return false;
+    });
+});
+{% endif %}
+</script>
+{% endblock %}

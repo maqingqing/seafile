@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block sub_title %}{% trans "Register" %} - {% endblock %}
+
+{% block extra_style %}
+<link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}css/bootstrap.popover.min.css" />
+{% endblock %}
+
+{% block main_content %}
+
+    <div class="step-tab">
+        <div class="container">
+            <span class="step">注册Paladin账号！</span>
+        </div>
+    </div>
+
+    <div class="resgiterCon">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-10 col-md-offset-1">
+                <div class="tipText">
+                    <p>注册Paladin账号，请填写个人资料。</p>
+                    <a href="{{ SITE_ROOT }}accounts/login/" class="can_login">已有账号，去登录</a>
+                </div>
+                <div class="resgiter-panel">
+                    <div class="con">
+                        <form action="" method="post">{% csrf_token %}
+                            {% if form.name.field.required %}
+                            <label for="id_name">{% trans "Name" %}</label>
+                            {{ form.name }} {{ form.name.errors }}
+                            {% endif %}
+
+                            <label for="id_email">输入{% trans "Email" %}</label>
+                            {{ form.email }}            {{ form.email.errors }}
+
+
+                            <label for="id_password1">设置{% trans "Password" %}</label>
+                            {{ form.password1 }}        {{ form.password1.errors }}
+                            <div id="pwd_strength"></div>
+                            <label for="id_password2">{% trans "Confirm Password" %}</label>
+                            {{ form.password2 }}        {{ form.password2.errors }}
+
+                            {% if form.department.field.required %}
+                            <label for="id_department">{% trans "Department" %}</label>
+                            {{ form.department }}       {{ form.department.errors }}
+                            {% endif %}
+
+                            {% if form.telephone.field.required %}
+                            <label for="id_telephone">{% trans "Telephone" %}</label>
+                            {{ form.telephone }}        {{ form.telephone.errors }}
+                            {% endif %}
+
+                            {% if form.note.field.required %}
+                            <label for="id_note">{% trans "Note" %}</label>
+                            {{ form.note }}             {{ form.note.errors }}
+                            {% endif %}
+
+                            <p class="error hide"></p>
+                            <input type="submit" value="{% trans "Sign Up" %}" class="submit submit_signup"  />
+                        </form>
+{#                        {% endif %}#}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
+
+    <div id="footer" class="footer">
+        <div class="container">
+            <div class="row">
+                <div class="footText">© 2016 清华大学高性能所网格计算实验室</div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block extra_script %}
+<script type="text/javascript" src="{{MEDIA_URL}}js/bootstrap.min.js"></script>
+<script type="text/javascript">
+{% if strong_pwd_required %}
+{% include "snippets/password_strength_js.html" %}
+var passwd_tip = "{% blocktrans %}Passwords must have at least {{min_len}} characters and contain {{level}} of the following: uppercase letters, lowercase letters, numbers, and symbols.{% endblocktrans%}";
+$("#id_password1")
+.popover({ // bootstrap plugin 'popover'
+    container: 'body',
+    content: passwd_tip,
+    template: '<div class="popover" role="tooltip"><div class="arrow"></div><div class="popover-content"></div></div>',
+    trigger: 'focus'
+})
+.keyup(function() {
+    var pwd = $(this).val();
+    if ($.trim(pwd)) {
+        var level = getStrengthLevel(pwd);
+        showStrength(level);
+    } else {
+        $("#pwd_strength").html("");
+    }
+});
+{% endif %}
+
+$('form').submit(function(){
+    var email = $.trim($('input[name="email"]').val()),
+        pwd1 = $.trim($('input[name="password1"]').val()),
+        pwd2 = $.trim($('input[name="password2"]').val());
+        level = getStrengthLevel(pwd1);
+
+        if (!email) {
+            $('.error').html("{% trans "Email cannot be blank" %}").removeClass('hide');
+            return false;
+        }
+        if (!pwd1) {
+            $('.error').html("{% trans "Password cannot be blank" %}").removeClass('hide');
+            return false;
+        }
+        if (!pwd2) {
+            $('.error').html("{% trans "Please enter the password again" %}").removeClass('hide');
+            return false;
+        }
+        if (pwd1 != pwd2) {
+            $('.error').html("{% trans "Passwords don't match" %}").removeClass('hide');
+            return false;
+        }
+        {% if strong_pwd_required %}
+            if (level < {{level}}) {
+                $('.error').html(passwd_tip).removeClass('hide');
+                return false;
+            }
+        {% endif %}
+   });
+</script>
+{% endblock %}
